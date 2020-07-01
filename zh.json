@@ -25,7 +25,7 @@
 			"p5": "系统中的对象不可变。NeoFS核心仅使用固定的对象标头，并将数据视为不可变的字节序列，而不与内容进行交互。扩展标头存储关于用户数据属性、加密算法、校验和值、加密签章、标识符等信息。此外，扩展标头由单独的数据处理和转换模块按照出现的顺序进行处理。从而可通过将用户数据的处理和转换委托予系统的高层模块来组织处理信息的复杂方案。",
 			"p6":"用户可以为自有包容器定义布局规则和ACL。布局规则将应用于所有存储对象。该规则由一组应用于网络地图的SELECT()或FILTER()操作组成。此类操作的结果是衍生一种可以放置数据的网络地图的子图。其中，SELECT()操作应用于树。其输入操作是该级别的重复因子和存储区类型。另外，布局规则中的多个操作是按顺序排列，且每个后续的SELECT(r, 类型)操作均应用于前一操作的结果。FILTER()操作应用于图形。输入操作是存储区类型、值和比较运算。对于文本值，则可应用eq、ne操作。而对于数值，还可以应用gt、ge、lt和le操作。此外，图形上的一系列操作(于布局规则中)可以通过使用AND或NOT操作组合。递归地执行定位函数，并对上一步检索到的所有节点应用于下一步操作。",
 			"p7": "用户可以向NeoFS网络的任意节点发送存储或获取对象的请求，该节点将请求重定向到满足对象所属包容器布局规则的节点。",
-			"p8": "NeoFS请求、其结构和生存周期在<a href=\"https://github.com/nspcc- dev/neofs-api/tree/master/protodocs \">API文档</a>中进行了描述。",
+			"p8": "NeoFS请求、其结构和生存周期在<a href=\"https://github.com/nspcc-dev/neofs-api/tree/master/proto-docs \">API文档</a>中进行了描述。",
 			"p9": "将包容器中对象完整性的控制权分配予该包容器的存储节点。它们将执行数据复制、垃圾收集、恢复和迁移。如果所有数据均按照存储策略存储，则该等操作的基础是包容器集体性奖励的经济模型;否则将会受到集体罚款。",
 			"标题": "数据存储"
 		}
@@ -147,7 +147,7 @@
 	"方式": {
 		"CLI": {
 			"p1": "查看余额",
-			"p2": "如果您尚未通过\"存款\"调用0xcdabc9be4bfbc2ca4696e6cd6da3af104f929601智能合约发送NEP-5令牌，请使用<a href=\"/wallet\" target=\"__blank\">our simple wallet</a>用于NeoFS测试网或您的自定义令牌。",
+			"p2": "如果您尚未通过\"存款\"调用0xcdabc9be4bfbc2ca4696e6cd6da3af104f929601智能合约发送NEP-5令牌，请使用<a href=\"/wallet\" target=\"_blank\">our simple wallet</a>用于NeoFS测试网或您的自定义令牌。",
 			"p3": "创建包容器",
 			"p4": "上传对象至包容器",
 			"p5": "创建存储组",
@@ -162,7 +162,7 @@
 			"标题": "将NEP-5 GAS存入NeoFS"
 		},
 		"运行CLI": {
-			"p1":"获取<a href=\"https://github.com/nspcc-dev/neofs-local\" target=\"_blank\"> neofs-本地存储库</a>",
+			"p1":"获取<a href=\"https://github.com/nspcc-dev/neofs-local\" target=\"_blank\"> neofs-local repository </a>",
 			"p2": "卷目录为\"./data\"。此外，添加可从docker进行访问的文件。在docker中，该目录将在根目录\"/data\"中找到。",
 			"p3": "运行 NeoFS CLI",
 			"p4": "为CLI申明NeoFS端点",
@@ -198,7 +198,7 @@
 			"p1":"RPC端点http://fs.nspcc.ru:30333可用于自定义钱包。",
 			"p2": "以下所有示例均适用于neo-python。",
 			"p3": "使用预配置<a href=\"https://github.com/nspcc-dev/neo-python\" target=\"_blank\">neo-python</a>:",
-			"p4": "或获取默认<a href=\"https://github.com/CityOfZion/neo-python\" target=\"_blank\"> neo-python </a>：并更改配置文件neo / data / protocol .privnet.json <a href=\"https://github.com/nspcc-dev/neo-python/blob/master/neo/data/protocol.privnet.json\" target=\"_blank\">至此</a>：",
+			"p4": "或获取默认<a href=\"https://github.com/CityOfZion/neo-python\" target=\"_blank\"> neo-python </a>：并更改配置文件neo/data/protocol.privnet.json <a href=\"https://github.com/nspcc-dev/neo-python/blob/master/neo/data/protocol.privnet.json\" target=\"_blank\">至此</a>：",
 			"标题": "钱包"
 		},
 		"钱包": "如何将NEP-5 GAS存入NeoFS（Python Neo-cli）"

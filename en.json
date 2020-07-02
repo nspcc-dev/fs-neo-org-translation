@@ -215,6 +215,18 @@
 		}
 	},
 	"Network": {
+		"Blockchain": {
+			"p1": "The main smart contracts that provide the input and output of GAS tokens to the NeoFS account and the list of nodes of Inner Ring, are on the Neo Mainnet. NeoFS internal banking and data audit results are on the sidechain. This allows not to load a large number of NeoFS internal transactions to the Neo blockchain network. This approach also allows us to achieve complete anonymity of the Inner Ring nodes and not to disclose them to other network nodes.",
+			"p2": "The main NeoFS network contract is deployed in the Neo main network. The roles of this contract are to maintain the list of the Inner Ring nodes, maintain the list of nodes-candidates for Inner Ring, accept Neo GAS input assets from users, and withdraw Neo GAS to users.",
+			"p3": "Service contracts of the NeoFS network such as Network Map contract, Container contract, Balance contract, Data Audit contract, and Reputation contract are on the NeoFS Neo sidechain.",
+			"p4": "The Network Map contract is the main NeoFS network contract in the NeoFS Neo sidechain. The roles of this contract are to provide to the sidechain contracts a list of the Inner Ring nodes, which is initially stored in the Neo main network blockchain in the NeoFS contract, to manage the list of Storage nodes, maintain the Network Map, to take snapshots of Network Map when a new epoch sets, and store the epoch counter, providing an interface for changing the epoch to the Inner Ring nodes. Epoch is a real-time period during which a permanent Network Map exists.",
+			"p5": "The Container contact is deployed in the NeoFS Neo sidechain. The roles of this contract are to maintain a list of containers and provide such operations as to get a specific container by its identifier, to get a list of all user containers, and to get a list of all containers.",
+			"p6": "The Balance contact, being in the NeoFS Neo sidechain, provides the internal NeoFS banking performing a large number of fast microtransactions based on the results of the NeoFS network.",
+			"p7": "The Reputation contract’s role is maintaining reputation ratings of Storage nodes. This contract is also deployed in the NeoFS Neo sidechain to process a lot of invocations to process the view of Storage nodes' trust.",
+			"p8": "Neo main network chain and NeoFS Neo sidechain do not interact directly. The bridge between the two chains is Inner Ring which subscribes to events from both chains. The Inner Ring nodes are responsible for servicing the Neofs network, monitoring Storage nodes, and data integrity of the storage network.",
+			"p9": "The Inner Ring nodes are connected to Neo Blockchain. They are constantly monitoring events coming from the blockchain to synchronize their state, the state of the NeoFS smart contract that manages users' GAS deposits and information about the Inner Ring nodes themselves, and NeoFS Neo sidechain smart contracts. ",
+			"title": "NeoFS Blockchain Components"
+		},
 		"Environment": {
 			"p1": "As files are organized in directories in file system, objects are organized in containers in NeoFS.",
 			"p2": "Each container is served by a subset of storage nodes that satisfy storage policy defined for this particular container by the user. To calculate that nodes’ subset, storage policy filters are applied to Network Map. The resulting set of nodes is responsible for making sure that storage policy is satisfied and data is not corrupted. In case of success, they share users' payment for data storage. One storage node may serve many containers, so if it behaves correctly small shares from each container summ-up in a significant reward. The same is true for the losses in case of container nodes' misbehavior. This motivates nodes to keep an eye on other container members and properly perform all required replication, migration and data recovery processes.",
@@ -259,6 +271,10 @@
 			"NeoGO": {
 				"desc": "NeoGO nodes status in the Neo Mainnet.",
 				"title": "NeoGO nodes status"
+			},
+			"RequestGas": {
+				"desc": "Get GAS for public NeoFS Testnet",
+				"title": "Request GAS to Neo Address"
 			},
 			"SDK": {
 				"desc": "It allows developers to deploy their own local NeoFS networks, where they may begin testing the solution and integrating support for it into their own applications.",

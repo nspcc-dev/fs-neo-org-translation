@@ -1,329 +1,329 @@
 {
-	"Audit": {
-		"DataAudit": {
-			"p1": "How does NeoFS ensure data is not lost or corrupted? Each epoch, Inner Ring nodes perform Data Audit. It is a two-stage game in terms of game theory. At the first stage, nodes in a selected container are asked to collectively reconstruct a list of homomorphic hashes that would form a composite hash stored in storage group. By doing this, nodes demonstrate that they have all objects and are able to provide hash of those objects. The provided list of hashes can be validated, but at this stage, it is unknown, if some nodes are lying.",
-			"p2": "At the next stage, it is necessary to make sure that nodes are honest and do not fake check results. Inner  Ring nodes calculate a set of nodes’ pairs that store the same objects and ask each node to provide thee homomorphic hashes of this object. Ranges are chosen in a way that the hash of a range asked from one node would be the composite hash of ranges asked from another node in that pair. Nodes cannot predict objects or ranges that would be chosen for audit. They cannot even predict a pair node for the game. This stage discovers malicious nodes fast because each node is serving multiple containers and storage groups and participates in many data audit sessions. When node is caught in a lie it will not get any rewards for this epoch. So the price of faking checks and risks is too high and it is easier and cheaper for the node to be honest and behave correctly.",
-			"p3": "Combining the fact of nodes being able to reconstruct the storage group's composite hash and the fact of nodes' honest behavior, the system can consider that data is safely stored, not corrupted and available with a high probability.",
-			"title": "Data Audit"
+	"审计": {
+		"数据审计": {
+			"p1": " NeoFS如何确保数据不会丢失或损坏？每个时期，内环节点均会执行数据审计。就博弈论角度而言，这是一个两阶段的博弈。第一个阶段，节点要求所选包容器中的节点共同重构一个同态哈希表，该列表将形成存储于存储群组中的复合哈希。通过此操作，节点可表明其拥有所有对象，且能够提供该等对象的哈希。此类哈希列表可被验证，然而在此阶段，若某些节点说谎，则它是未知的。",
+			"p2": "第二阶段，请务必确保节点真实，且不会伪造审计结果。内环节点可计算一组存储相同对象的节点对，同时，它要求每个节点提供该对象的同态哈希。而其范围选择的方式是，从一个节点请求的范围哈希将是该节点对中另一个节点请求的范围的复合哈希。然而，节点无法预测审计将选择的对象或范围。它们甚至都无法预测游戏的配对节点。由于每个节点均为多个包容器和存储组提供服务，并参与众多数据审计会话，因此，本阶段可以快速发现恶意节点。当恶意节点被拆穿，本阶段内它将不会得到任何回报。因此，伪造检查和风险的代价太高，而就节点而言，保证真实且行为得当更容易也更便宜。",
+			"p3": "当节点能够重建存储组的复合哈希与节点诚实行为的事实相结合，系统便可以认为数据已安全存储，无损坏且可用的概率较高。"
+			"标题": "数据审计"
 		},
-		"ZeroKnowledge": {
-			"p1": "In case of a large number of objects in a distributed network of untrusted nodes with an ever-changing topology, classical approach with comparing objects' hashes with some sample in a central meta-data storage is not efficient. This causes unacceptable overhead.",
-			"p2": "To solve this problem, NeoFS uses Homomorphic hashing. It is a special type of hashing algorithms that allows computing the hash of a composite block from the hashes of individual blocks.",
-			"p3": "For integrity checks, NeoFS calculates a composite homomorphic hash of all the objects in a group under control and puts it into a structure called Storage Group. During integrity checks, NeoFS nodes can ensure that hashes of stored objects are correct and a part of that initially created composite hash. This can be done without moving object's data over the network and no matter how many objects are in a storage group, the hash size is the same.",
-			"title": "Zero-knowledge and Homomorphic hashing"
+		"零知识": {
+			"p1": "在拓扑结构不断变化的不可信节点的分布式网络中，如果存在大量对象，则将对象哈希值与中央元数据存储中的样本进行比较的传统方法无效。从而导致不可接受的开销。" ，
+			"p2": "为解决该问题，NeoFS使用了同态哈希。这是一种特殊类型的哈希算法，它可根据单个数据块的哈希来计算复合块的哈希。",
+			"p3": "为进行完整性检查，NeoFS计算了受控组中所有对象的复合同态哈希，并将其放入一个称为存储组的结构中。进行完整性检查期间，NeoFS节点可以确保存储对象的哈希均正确无误，且还可以确保最初创建的复合哈希的一部分。此操作无需在网络上移动对象数据，且无论存储组中有多少个对象，哈希大小均相同。",
+			"标题": "零知识和同态哈希"
 		}
 	},
-	"Data": {
-		"Storage": {
-			"p1": "To implement data storage and processing, the NeoFS system operates with objects. An object is a structure intended to be placed on a data storage device and transmitted over a network. This structure consists of a user’s data block of a finite length and a set of headers containing information about the data and the object itself. The size of the data in the object can be zero.",
-			"p10": "In addition to monitoring the data integrity, Storage nodes also control access rights to data. NeoFS has a flexible ACL system. It contains the basic ACL written to the container structure, bearer token, and the extended ACL, if it is allowed in the basic ACL, in the container object. The basic ACL is written into the container structure and, as a result, is created together with the container and cannot be changed. Validation of the basic ACL has to be cheap and cover the majority of user needs. In the container structure, this is a 32-bit integer storing a bit field. The extended ACL is stored in the object in the container. It cannot be changed but a new object can be added with a new version which will logically replace previously created objects. In the extended object headers, it is indicated that this is an object of type ExtendedACL and its version. the objects of type ExtendedACL can only be created by the owner of the container because this follows logically from the immutability of the underlying ACL.",
-			"p11": "If the user, when creating the container, has set the possibility of using the extended ACL, the ExtendedACL object is automatically created with the zero version and an empty access table in the payload section. If an error occurred while trying to get the object with extended ACLs then the authorization check is considered failed.",
-			"p12": "The Bearer keyword is used to activate authorization checks on the Bearer token transferred in the request headers. This is a table of the same type as the Extended ACL but with fields indicating the time of the token's validity (with which epoch or height) and a chain of key signatures that goes back to the owner of the container. The Bearer token is processed in the same way as the Extended ACL. If the Bearer token is present in the request then it cancels the check on the Extended ACL.",
-			"p2": "Objects may have links to other objects. User data may be split into several linked objects to solve scaling and balancing problems.",
-			"p3": "There are fixed headers containing the version of the object format, its total length, unique identifier, the optional links to other objects, the signature of a data publisher, type identifier of the next extended headers, and identifiers for internal NeoFS processes.",
-			"p4": "The extended headers have a similar structure. User data attached to the object is placed after headers.",
-			"p5": "The object in the system is immutable. The NeoFS core works only with a fixed object header and treats the data as an immutable sequence of bytes without interacting with the content. Extended headers store information about user data properties, encryption algorithms, checksum values, cryptographic signatures, identifiers, etc. Extended headers are processed in the order of appearance by separate data processing and transformation modules. This allows organizing complex schemes of working with information by delegating the processing and conversion of user data to higher-level modules of the system.",
-			"p6": "The user can define a placement rule and ACL to an owned container. That placement rule is applied to all stored objects. The placement rule consists of a set of SELECT() or FILTER() operations applied to Network Map. The result of these operations is a subgraph of Network Map where data can be placed. The SELECT() operation is applied to a tree. The operation inputs are a replication factor at this level and a bucket type. Multiple operations in the placement rule are put into order and each subsequent SELECT(r, type) operation is applied to the result of the previous one. The FILTER() operation is applied to a graph. The operation inputs are a bucket type, value, and comparison operation. For text values, operations eq, ne are available. For numerical values, gt, ge, lt, and le are additionally available. A set of operations on the graph (in the placement rule) can be combined by using AND, OR, NOT operations. The placement function is executed recursively with the operation of the next step being applied for all the nodes retrieved at the previous step.",
-			"p7": "The user can send a request for storage or get of the object to any node of the NeoFS network which will redirect the request to the nodes satisfying the placement rule of the container to which the object belongs.",
-			"p8": "The NeoFS requests, their structure, and the life cycle are described in the <a href=\"https://github.com/nspcc-dev/neofs-api/tree/master/proto-docs\">API documentation</a>.",
-			"p9": "Control over the object's integrity in the container is assigned to Storage nodes of this container. They perform data replication, garbage collection, recovery, and migration. The basis for these actions is the economic model of a collective reward of the container if all data is stored in accordance with the storage policy, or collective fine if it is not.",
-			"title": "Data Storage"
+	"数据": {
+		"存储": {
+			"p1": "为实现数据存储和处理，于是，NeoFS系统使用对象进行操作。其中，对象是指一种用于放置在数据存储设备上并通过网络传输的结构。该结构由有限长度的用户数据块和一组包含数据和对象本身信息的标头组成。此外，对象中的数据大小可以为零。",
+			"p10":"存储节点除监视数据的完整性外，它还控制对数据的访问权限。NeoFS配备有灵活的ACL系统。它在包容器对象中涵盖写入包容器结构的基础ACL、承载令牌和扩展ACL(若基础ACL可允许)。其中，基础ACL被写入容器结构中，因此它与容器一起创建且无法更改。此外，基础ACL的验证还必须很便宜，且能够满足大多数用户的需求。在包容器结构中，这是存储位字段的32位整数。扩展ACL存储于包容器内的对象中。它不能被更改，但可以使用新版本添加新对象，该新版本将在逻辑上替换先前创建的对象。 而在扩展对象标头中，这表明是扩展ACL类型的对象及其版本。另外，扩展ACL类型的对象仅由包容器的所有者创建，这在逻辑上源于底层ACL的不可变性。",
+			"p11": "如果用户在创建包容器时设置了使用扩展ACL的可能性，则系统会在有效负载部分使用零版本和空访问表自动创建扩展ACL对象。若在尝试获取配有扩展ACL的对象时发生错误，则视为授权检查失败。",
+			"p12": " 承载关键字用于激活对在请求标头中传输的承载标记的授权检查。这是一个与扩展ACL类型相同的表，但它包含指示令牌有效性时间的字段和返回到容器所有者的密钥签名链。此外，承载令牌的处理方式与扩展ACL相同。如果请求中存在承载令牌，那么它将取消对扩展ACL的检查。",
+			"p2": "对象可以链接其他对象。用户数据可被分割成几个链接对象，以解决伸缩性和平衡问题。",
+			"p3": "存在包含对象格式的版本、其总长度、唯一标识符、到其他对象的可选链接、数据发布者的签名、下一个扩展标头的类型标识符以及内部NeoFS进程标识符的固定标头。",
+			"p4": "扩展标头具有类似的结构。另外，附加到对象的用户数据置于标头之后。",
+			"p5": "系统中的对象不可变。NeoFS核心仅使用固定的对象标头，并将数据视为不可变的字节序列，而不与内容进行交互。扩展标头存储关于用户数据属性、加密算法、校验和值、加密签章、标识符等信息。此外，扩展标头由单独的数据处理和转换模块按照出现的顺序进行处理。从而可通过将用户数据的处理和转换委托予系统的高层模块来组织处理信息的复杂方案。",
+			"p6":"用户可以为自有包容器定义布局规则和ACL。布局规则将应用于所有存储对象。该规则由一组应用于网络地图的SELECT()或FILTER()操作组成。此类操作的结果是衍生一种可以放置数据的网络地图的子图。其中，SELECT()操作应用于树。其输入操作是该级别的重复因子和存储区类型。另外，布局规则中的多个操作是按顺序排列，且每个后续的SELECT(r, 类型)操作均应用于前一操作的结果。FILTER()操作应用于图形。输入操作是存储区类型、值和比较运算。对于文本值，则可应用eq、ne操作。而对于数值，还可以应用gt、ge、lt和le操作。此外，图形上的一系列操作(于布局规则中)可以通过使用AND或NOT操作组合。递归地执行定位函数，并对上一步检索到的所有节点应用于下一步操作。",
+			"p7": "用户可以向NeoFS网络的任意节点发送存储或获取对象的请求，该节点将请求重定向到满足对象所属包容器布局规则的节点。",
+			"p8": "NeoFS请求、其结构和生存周期在<a href=\"https://github.com/nspcc-dev/neofs-api/tree/master/proto-docs \">API文档</a>中进行了描述。",
+			"p9": "将包容器中对象完整性的控制权分配予该包容器的存储节点。它们将执行数据复制、垃圾收集、恢复和迁移。如果所有数据均按照存储策略存储，则该等操作的基础是包容器集体性奖励的经济模型;否则将会受到集体罚款。",
+			"标题": "数据存储"
 		}
 	},
-	"Features": {
-		"BasicComponent": {
-			"p1": "NeoFS network nodes run the same software and talk the same protocol but may have different roles. There are nodes that store data and process user API requests, they are regular storage nodes and form the Outer Ring. There are nodes that take care of network health, perform service tasks such as data audit and payments settlements and form the Inner Ring. There are not many of them and they use dBFT 2.0 consensus algorithm to coordinate their actions.",
-			"read": "Read more",
-			"title": "Basic components and network"
+	"特征": {
+		"基本组件": {
+			"p1": "尽管NeoFS网络节点运行相同的软件并使用相同的协议，但它们可能扮演不同的角色。其中，有部分节点可以存储数据并处理用户API请求，它们属于常规存储节点，并形成外环。此外，还有有些节点负责网络健康运行、执行数据审计和支付结算等服务任务，并形成内环。该类节点不是很多，它们使用dBFT 2.0一致性算法来协调其操作。",
+			"读取": "读取更多",
+			"标题": "基本组件及网络"
 		},
-		"ChaoticEnvironment": {
-			"p1": "The bigger the NeoFS network grows, the more stable it becomes, because the chance of network is changed would affect the particular container is decreasing with the increasing number of nodes in the network. It means, unlike in DHT approach, the amount of needed data migration decreases with the network growth.",
-			"title": "Designed to work reliably in chaotic environment"
+		"混沌环境": {
+			"p1": "NeoFS网络发展得越大，网络就会越稳定，因为随着网络中节点数量的增加，网络的改变会影响到特定包容器的机会在减少。这意味着，需要迁移的数据量随网络的增长而减少，它与DHT方法不同。",
+			"标题": "旨在混乱环境中可靠的工作"
 		},
-		"Control": {
-			"card1": {
-				"text": "your data is stored",
-				"title": "Where"
+		"控制": {
+			"插件1": {
+				"文本": "您的数据已存储",
+				"标题": "地点"
 			},
-			"card2": {
-				"text": "your data is stored",
-				"title": "How"
+			"插件2": {
+				"文本": "您的数据已存储",
+				"标题": "方式"
 			},
-			"card3": {
-				"text": "can get access to your data",
-				"title": "Who"
+			"插件3": {
+				"文本": "可以访问您的数据",
+				"标题": "谁"
 			},
-			"p1": "Since anyone may participate in NeoFS network, reliable mechanisms to ensure users' data consistency and availability in a chaotic environment are needed.",
-			"p2": "To achieve this goal, the combination of homomorphic hashing for data integrity checks and game theory models, to create a situation where all nodes behave correctly and the data is stored safely, is used.",
-			"p3": "A decentralized nature of NeoFS eliminates not only centralized points of failure but also centralized points of control. In NeoFS, only users have full control over their data, where, how it is stored, and who can get access to it.",
-			"title": "NeoFS puts the control over data in users’ hands"
+			"p1": "由于任何人均可参与NeoFS网络，因此需要可靠的机制以确保用户在混沌环境中数据的一致性和可用性。",
+			"p2": "为实现该目标，可使用保证数据完整性检查的同态哈希与博弈论模型相结合，以创建所有节点均正常运行且数据安全存储的情况。",
+			"p3": " NeoFS的分散性不仅消除了集中性的故障点，也消除了集中性的控制点。在NeoFS中，仅用户才可完全控制其数据，包括数据的存储位置、存储方式以及谁可以访问它们。",
+			"标题": "NeoFS将数据的控制权交予用户"
 		},
-		"Hardware": {
-			"p1": "NeoFS is designed to work on commodity hardware without any special hardware requirements. This allows users to quickly replace failed system components with what can be bought in a local computer store.",
-			"title": "Runs on commodity hardware"
+		"硬件": {
+			"p1": "NeoFS旨在为商用硬件而工作，无任何特殊硬件要求。这使得用户可以使用在本地计算机商店购买的系统组件快速替换出现故障的系统组件。",
+			"标题": "在商用硬件上运行"
 		},
-		"IncentiveModel": {
-			"p1": "Incentive model and pricing follow a free market principle. Each node declares how much it wants to receive as a reward for data storage services for the upcoming epoch. Placement function considers the declared price and prefers nodes with better prices. However, since nodes in Network Map declare key-value attributes describing their parameters, such as geographical location, type of storage, capacity and other things also used in Storage Policy, it leaves room for nodes that want higher price, better or unique services to still get into the placement function result.",
-			"p2": "In short, if node is too greedy, it does not get users and rewards. To have higher prices the node needs to satisfy market demand or provide something unique.",
-			"p3": "As it is shown on the figure below, node needs to keep price \"in the market\" to get the highest profit. This should guarantee a competitive price for data storage in NeoFS.",
-			"title": "Incentive model based on market principles"
+		"激励模式": {
+			"p1": "激励模式和定价务均遵循自由市场原则。每个节点均声明其要为即将到来的时代提供数据存储服务的报酬作为奖励。布局功能需考虑声明的价格，并选择价格更好的节点。然而，由于网络地图中的节点声明了描述其参数的键值属性，例如地理位置、存储类型、容量和其他存储策略中也使用的东西，这就为希望获得更高价格、更好或独特服务的节点仍然可以进入布置功能结果而保留了空间。",
+			"p2": "简而言之，如果节点过于贪婪，它便不会获得用户和奖励。因此，为获取更高价格，节点需要满足市场需求或提供独特产品。",
+			"p3": "如下图所示，节点需要将价格保持\"在市场中\"以获得最高利润。保证从而NeoFS中数据存储的价格具有竞争力。",
+			"标题": "基于市场原则的激励模式"
 		},
-		"Integration": {
-			"p1": "NeoFS is demonstrating NEO’s commitment to practical idealism as well as its vision of an integrated, user-centric Internet of the future.",
-			"p2": "Through gateways (protocol adapters), users can easily access NeoFS through industry-standard protocols such as HTTP or S3.",
-			"p3": "Moreover, the open nature of NeoFS enables users to freely write his or her own gates to integrate with third-party system for seamless on and off-chain integration as well as unmatched accessibility.",
-			"title": "Integrated with popular protocols such as HTTP and S3"
+		"集成": {
+			"p1": "NeoFS展示了NEO对现实理想主义的承诺，以及其对集成、以用户为中心的未来互联网的愿景。",
+			"p2": "通过网关(协议适配器)，用户可以通过HTTP或S3等行业标准协议轻松访问NeoFS。",
+			"p3":"此外，NeoFS的开放性使用户可以自由编写自己的门户，并与第三方系统集成，以实现无缝的链上和链下集成以及无与伦比的可访问性。",
+			"标题": "与诸如HTTP和S3之类的主流协议集成"
 		},
-		"Introduction": {
-			"p1": "NeoFS is a distributed, decentralized object storage network developed by <a href=\"https://nspcc.ru/en\" target=\"_blank\">Neo SPCC</a>.  Built with Neo blockchain integration in mind, NeoFS aims to support the shift away from third-party storage providers, providing users with complete control over their data.",
-			"p2": "Nodes are organized in  peer-to-peer network that takes care of storing and distributing user's data. Any Neo user may participate in NeoFS network and get paid for providing storage resources to other users or store his data in NeoFS and pay a competitive price for it.",
-			"p3": "The service is designed to work with Neo smart contracts, allowing for truly decentralized applications, and can also be used as a content  delivery network. Users can rent out storage in return for Neo GAS tokens or use GAS to store files in the network.",
-			"p4": "Representing Neo’s commitment to building the future, NeoFS offers unparalleled data storage  control to users and developers by bringing together the benefits of decentralization and real-world integration.",
-			"p5": "NeoFS ensures user data security and mitigates against malignant nodes by ensuring zero-knowledge data validation through a combination of homomorphic cryptography and game theory models.",
-			"title": "Introduction"
+		"引入": {
+			"p1":"NeoFS是由<a href=\"https://nspcc.ru/en\" target=\"_blank\">Neo SPCC</a>开发的分布式、分散式的对象存储网络。鉴于Neo区块链集成，NeoFS旨在支持第三方存储提供商的转移，为用户提供对其数据的完全控制。",
+			"p2": "节点被有条理的安排在对等网络中，负责用户数据的存储和分发。任何Neo用户均可参与NeoFS网络，此外，因向其他用户提供存储资源或将其数据存储在NeoFS中而获得报酬，并为此支付有竞争力的价格。",
+			"p3": "该服务旨在与Neo智能合约一起工作以支持真正的去中心化应用，该服务也可以用作内容分发网络。用户可以出租存储空间以换取Neo GAS令牌，或者使用GAS在网络中存储文件。",
+			"p4": "NeoFS体现了Neo对构建未来的承诺，通过将分散化和真实世界集成的好处结合在一起，为用户和开发人员提供了无与伦比的数据存储控制。", 
+			"p5": "NeoFS通过将同态密码学和博弈论模型相结合以确保零知识数据验证，从而确保用户数据安全并缓解恶性节点的攻击。",
+			"标题": "引入"
 		},
-		"KeyBenefits": {
-			"p1": "Infinitely scalable due to Network Map and Data Placement mechanisms",
-			"p2": "Designed to work reliably in chaotic environment",
-			"p3": "Users have full control over how their data is stored and distributed",
-			"p4": "Integrated with popular protocols such as HTTP and S3",
-			"p5": "Zero-knowledge data validation based on homomorphic cryptography",
-			"p6": "Directly accessible from smart contract code",
-			"p7": "Neo GAS is used for payments rather than custom tokens",
-			"p8": "Incentive model based on market principles where all peers agree on prices",
-			"p9": "Runs on commodity hardware",
-			"title": "Key benefits and competitive advantages"
+		核心利益": {
+			"p1": "由于网络地图和数据布局机制，可无限扩展",
+			"p2": "旨在在混沌环境中可靠地工作",
+			"p3": "用户可以完全控制其数据的存储和分发方式",
+			"p4": "与诸如HTTP和S3之类的主流协议集成",
+			"p5": "基于同态密码学的零知识数据验证",
+			"p6": "可使用智能合约代码直接访问",
+			"p7": " Neo GAS用于付款，而非自定义令牌",
+			"p8": "基于市场原则的激励模式，所有同行均同意的价格",
+			"p9": "在商用硬件上运行",
+			"标题": "关键利益和竞争优势"
 		},
-		"Payment": {
-			"p1": "NeoFS uses GAS for all payments. To be able to pay for storage services in NeoFS, the one has to deposit some GAS to NeoFS smart contract address. This event is monitored by Inner Ring nodes and reflected in user's account balance internally in NeoFS.",
-			"p2": "NeoFS Inner Ring nodes keep track of all NeoFS accounts and use dBFT 2.0 consensus algorithm, the same as in Neo blockchain, agree on users' mutual settlements, reward distribution over node owners and other payment-related procedures.",
-			"read": "Read more",
-			"title": "Neo GAS is used for payments"
+		"支付": {
+			"p1": "NeoFS使用GAS支付所有费用。要想在NeoFS支付储存服务的费用，您必须将一些GAS储存到NeoFS的智能合约地址。该事件由内环节点监控，并在NeoFS内部反映在用户的账户余额中。",
+			"p2": "NeoFS内环节点跟踪所有NeoFS账户，同时使用与Neo区块链相同的dBFT 2.0共识算法，并就用户相互结算、节点所有者奖励分配以及其他与支付相关流程达成协议。",
+			"读取": "读取更多",
+			"标题": "Neo GAS用于支付"
 		},
-		"RealWorld": {
-			"p1": "Unlike many other projects in this area, <a href=\"https://nspcc.ru/en\" target=\"_blank\">NeoSPCC</a> is not trying to create a parallel reality in a technological sense. Solving real-world problems requires to use standard protocols and have ability to integrate NeoFS with existing systems. There are protocol adapters, or gateways, that allow accessing NeoFS via standard HTTP or S3 protocols. Users can develop their own gateways to integrate NeoFS with existing systems they are using, such as accounting system, CRM, a corporate backup service etc.",
-			"title": "NeoFS is geared for real-world applications"
+		"现实世界": {
+			"p1": "不同于该领域的许多其他项目，<a href=\"https://nspcc.ru/en\" target=\"_blank\">NeoSPCC</a>并非试图在技术领域创建平行现实。解决现实问题需使用标准协议，并具备将NeoFS与现有系统集成的能力。其中，协议适配器或网关可通过标准HTTP或S3协议访问NeoFS。用户可以开发自己的网关，将NeoFS于其正在使用的现有系统集成，如会计系统、CRM、企业备份服务等。",
+			"标题": "NeoFS可面向实际应用"
 		},
-		"Scalability": {
-			"p1": "NeoFS is infinitely horizontaly scalable due to its architecture features such as novel Data Audit algorithm, Data Placement and Network Map.",
-			"p2": "Network Map is a multi-dimensional graph where nodes have attributes and are grouped by those attributes and their values. This allows using a special data placement function to find nodes that would store an object, when putting or getting it to/from NeoFS network without any network requests.",
-			"p3": "This approach allows not having any centralized meta-data storage keeping object's locations and not re-balancing data with every joining or leaving storage node.",
-			"title": "Infinitely scalable due to Network Map and Data Placement"
+		"可扩展性": {
+			"p1": "NeoFS由于其新颖的数据审计算法、数据布局和网络地图等架构特性，因此它具有无限的水平可扩展性。",
+			"p2": "网络地图是一种多维图，其中节点具有属性，可根据该等属性及其数值进行分组。当无任何网络请求的情况下将对象置于NeoFS网络或从NeoFS网络获取对象时，可使用特殊的数据布局功能以查找将存储对象的节点。",
+			"p3":"该方法不允许使用任何集中式元数据存储来保存对象的位置，也不允许在每次连接或离开存储节点时重新平衡数据。",
+			"标题": "网络地图和数据布局可无限扩展"
 		},
-		"SmartContract": {
-			"p1": "This feature becomes available in Neo 3.0 release with introduction of Oracles Protocol. Smart contracts will be able to issue GET and PUT requests for fixed-size objects.",
-			"title": "Directly accessible from smart contract code"
+		"智能合约": {
+			"p1":"随着Oracles协议的引入，此功能在Neo 3.0版本中可用。智能合约能够对固定大小的对象发出GET和PUT请求。",
+			"title": "可使用智能合约代码直接访问"
 		},
 		"ZK": {
-			"p1": "In case of a large number of objects in a distributed network of untrusted nodes with an ever-changing topology, classical approach with comparing objects' hashes with some sample in a central meta-data storage is not efficient. This causes unacceptable overhead.",
-			"p2": "To solve this problem, NeoFS uses homomorphic hashing. It is a special type of hashing algorithms that allows computing the hash of a composite block from the hashes of individual blocks.",
-			"read": "Read more",
-			"title": "Zero-knowledge data validation based on homomorphic cryptography"
+			"p1": "在拓扑结构不断变化的不可信节点的分布式网络中，如果存在大量对象，则将对象哈希值与中央元数据存储中的样本进行比较的传统方法无效。从而导致不可接受的开销。" ，
+			"p2": "为解决该问题，NeoFS使用了同态哈希。这是一种特殊类型的哈希算法，它可根据单个数据块的哈希来计算复合块的哈希。",
+			"读取": "读取更多",
+			"标题":"基于同态密码学的零知识数据验证"
 		}
 	},
 	"GAS": {
-		"IncentiveModel": {
-			"p1": "Incentive model and pricing follows a free market principles. Each node declares how much it wants to receive as a reward for data storage services for the upcoming epoch. Placement function considers the declared price and prefers nodes with better prices. However, because nodes in Network Map declare key-value attributes describing their parameters, such as geographical location, type of storage, capacity and other things also used in Storage Policy, it leaves room for nodes that want higher price, better or unique services to still get into the placement function result.",
-			"p2": "In short, if node is too greedy it does not get users and rewards. To achieve higher prices, node needs to satisfy market demand or provide something unique.",
-			"p3": "As it is shown on the figure above, the node needs to keep price \"in the market\" to get the highest profit. This should guarantee a competitive price for data storage in NeoFS.",
-			"title": "Incentive model"
+		"激励模式": {
+			"p1":"激励模式和定价务均遵循自由市场原则。每个节点均声明其要为即将到来的时代提供数据存储服务的报酬作为奖励。布局功能需考虑声明的价格，并选择价格更好的节点。然而，由于网络地图中的节点声明了描述其参数的键值属性，例如地理位置、存储类型、容量和其他存储策略中也使用的东西，这就为希望获得更高价格、更好或独特服务的节点仍然可以进入布置功能结果而保留了空间。",
+			"p2": "简而言之，如果节点过于贪婪，它便不会获得用户和奖励。因此，为获取更高价格，节点需要满足市场需求或提供独特产品。",
+			"p3": "如下图所示，节点需要将价格保持\"在市场中\"以获得最高利润。保证从而NeoFS中数据存储的价格具有竞争力。",
+			"标题": "激励模式"
 		},
-		"Input": {
-			"p1": "NeoFS uses Neo GAS for all payments. To be able to pay for storage services in NeoFS, the one has to deposit some GAS to NeoFS smart contract address. This event is monitored by Inner Ring nodes and reflected in user's account balance internally in NeoFS.",
-			"p2": "NeoFS Inner Ring nodes keep track of all NeoFS accounts and use dBFT 2.0 consensus algorithm, the same as in Neo blockchain, agree on users' mutual settlements, reward distribution over node owners and other payment-related procedures.",
-			"p3": "For instance, someone may own a few storage nodes and provide storage services, but at the same time use NeoFS for storing his or her backups in different geographical locations. In this case, rewards from storage nodes may be used to pay for backups automatically without transactions in Neo Blockchain.",
-			"title": "Neo GAS token input"
+		"输入": {
+			"p1": "NeoFS使用 Neo GAS支付所有费用。要想在NeoFS支付储存服务的费用，您必须将一些GAS储存到NeoFS的智能合约地址。该事件由内环节点监控，并在NeoFS内部反映在用户的账户余额中。",
+			"p2": "NeoFS内环节点跟踪所有NeoFS账户，同时使用与Neo区块链相同的dBFT 2.0共识算法，并就用户相互结算、节点所有者奖励分配以及其他与支付相关流程达成协议。",
+			"p3": "例如，某人可能拥有几个存储节点并提供存储服务，但同时使用NeoFS将其备份存储在不同的地理位置。在此情况下，来自存储节点的奖励可用于自动支付备份费用，而无需在Neo区块链中进行事务处理。",
+			"标题": "Neo GAS令牌输入"
 		},
-		"Withdraw": {
-			"p1": "It is possible to withdraw GAS accumulated inside NeoFS to Neo Blokchain address. To do so, the user has to issue withdraw call to NeoFS. Inner Ring nodes lock the desired amount and issue a cheque signed by all Inner Ring nodes. Then the user has to invoke NeoFS smart contract, providing it with this cheque. If it is verified successfully smart contract will send GAS to the user's address and Inner Ring nodes will reflect those changes in the internal account balance. If cheque is not used during validity period GAS locked for withdrawal will be unlocked.",
-			"title": "Neo GAS token withdraw"
+		"撤回": {
+			"p1": "可将NeoFS内积聚的GAS撤回至Neo区块链地址。为此，用户必须向NeoFS发出撤回调用。内环节点锁定所需的金额，并签发由所有内环节点签名的支票。然后，用户必须调用NeoFS智能合同，并为其提供该支票。若验证成功，则智能合约将向用户地址发送GAS，而内环节点将该等变化反映在内部账户余额中。如支票在有效期内未使用，则用于撤回的GAS锁将被解锁。",
+			"标题": "Neo GAS令牌撤回"
 		}
 	},
-	"Header": {
-		"Main": {
-			"title": "NeoFS: public distributed decentralized object storage"
+	"标头": {
+		"主程序": {
+			"标题": "NeoFS: 公共分布式分散对象存储"
 		}
 	},
-	"HowTo": {
+	"方式": {
 		"CLI": {
-			"p1": "Check balance",
-			"p2": "If you have not sent NEP-5 tokens by `Deposit` invocation of 0xcdabc9be4bfbc2ca4696e6cd6da3af104f929601 smart contract use <a href=\"/wallet\" target=\"_blank\"> our simple wallet</a> for NeoFS testnet or your custom token.",
-			"p3": "Create container",
-			"p4": "Upload object to container",
-			"p5": "Create Storage group",
-			"p6": "Any number of objec IDs can be added to the storage group creation command.",
-			"p7": "Get object",
-			"p8": "Open object by HTTP gate url",
-			"p9": "Additional information is available in <a href=\"https://github.com/nspcc-dev/neofs-local/blob/master/neofs-local/HOWTO.md\" target=\"_blank\">github HowTo file</a>.",
-			"title": "NeoFS CLI first steps"
+			"p1": "查看余额",
+			"p2": "如果您尚未通过\"存款\"调用0xcdabc9be4bfbc2ca4696e6cd6da3af104f929601智能合约发送NEP-5令牌，请使用<a href=\"/wallet\" target=\"_blank\">our simple wallet</a>用于NeoFS测试网或您的自定义令牌。",
+			"p3": "创建包容器",
+			"p4": "上传对象至包容器",
+			"p5": "创建存储组",
+			"p6": "可以将任意数量的对象ID添加到存储组创建命令。",
+			"p7": "获取对象",
+			"p8": "通过HTTP门户URL打开对象",
+			"p9": "其他信息可在<a href=\"https://github.com/nspcc-dev/neofs-local/blob/master/neofs-local/HOWTO.md\" target=\"_blank\">github HowTo file</a>中获取。",
+			"标题": "NeoFS CLI首要步骤"
 		},
-		"Deposit": {
-			"p1": "Select the Deposit tab in the NeoFS wallet. Enter the amount of NEP-5 GAS tokens for deposit to NeoFS balance and click on the \"Deposit\" button.",
-			"title": "Deposit NEP-5 GAS to NeoFS"
+		"存款": {
+			"p1":"选择NeoFS钱包中的\"存款\"选项卡。 输入要存入NeoFS余额的NEP-5 GAS令牌金额，然后单击\"存入\"按钮。",
+			"标题": "将NEP-5 GAS存入NeoFS"
 		},
-		"RunCLI": {
-			"p1": "Get <a href=\"https://github.com/nspcc-dev/neofs-local\" target=\"_blank\">neofs-local repository</a>",
-			"p2": "Volume directory is './data'. Add files to have access from docker. In the docker this dir will be available in the root - `/data`.",
-			"p3": "Run NeoFS CLI",
-			"p4": "Declare NeoFS endpoint for CLI",
-			"p5": "Can be declared your own NeoFS node or default as in example below.",
-			"p6": "We recommend choosing either your own node or the closest one possible. Available nodes <a href=\"/services/testnet\" target=\"_blank\"> can be found here</a>.",
-			"p7": "Declare your private key for CLI by WIF",
-			"title": "Run NeoFS CLI"
+		"运行CLI": {
+			"p1":"获取<a href=\"https://github.com/nspcc-dev/neofs-local\" target=\"_blank\"> neofs-local repository </a>",
+			"p2": "卷目录为\"./data\"。此外，添加可从docker进行访问的文件。在docker中，该目录将在根目录\"/data\"中找到。",
+			"p3": "运行 NeoFS CLI",
+			"p4": "为CLI申明NeoFS端点",
+			"p5": "可以申明为自有NeoFS节点，也可以声明为默认节点，如下例所示。",
+			"p6": "我们建议选择您自有的节点或最近的节点。可用节点可在<a href=\"/services/testnet\" target=\"_blank\">找到</a>。",
+			"p7": "通过WIF为CLI声明您的私钥",
+			"标题": "运行NeoFS CLI"
 		},
-		"Wallet": {
-			"p1": "RPC endpoint http://fs.nspcc.ru:30333 can be used for custom wallets.",
-			"p2": "Open <a href=\"/wallet\" target=\"_blank\" > NeoFS Testnet Wallet</a> ",
-			"p3": "Open an existing wallet by providing private key/WIF or create a new wallet and click on the \"Request tokens\" button. Or use neo-python. A description of how to do this is available <a href=\"/howto/py\" target=\"_blank\" > here</a>. It is possible to request tokens for your address <a href=\"/tokens\" target=\"_blank\" > here</a> in case of a custom wallet.",
-			"title": "Wallet"
+		"钱包": {
+			"p1": " RPC端点http://fs.nspcc.ru:30333可用于自定义钱包。",
+			"p2": "打开<a href=\"/wallet\" target=\"_blank\" > NeoFS 测试网钱包</a> ",
+			"p3":"通过提供私钥/WIF打开现有的钱包，或创建新的钱包，并单击\"请求令牌\"按钮。或使用neo-python。<a href=\"/howto/py\" target=\"_blank\">here</a>中提供了有关如何执行此操作的说明。 如果是自定义钱包，可以在您的地址<a href=\"/tokens\" target=\"_blank\">here</a>中请求令牌。",
+			"标题": "钱包"
 		},
-		"title": "How to deposit NEP-5 GAS to NeoFS"
+		"标题": "如何将NEP-5 GAS存入NeoFS"
 	},
 	"HowToPython": {
-		"Address": {
-			"p1": "Run neo-python wallet",
-			"p2": "Run pip install for first execution",
-			"p3": "Create wallet",
-			"p4": "Now you can find NEO address and public key in the NeoFS TestNet:",
-			"p5": "Add NEP-5 GAS token information to the wallet",
-			"p6": "Use `wallet export wif &lt;address&gt;` to get WIF for Neo address. For example:",
-			"title": "Get Neo address"
+		"地址": {
+			"p1": "运行neo-python钱包",
+			"p2": "运行pip 安装以进行第一次执行",
+			"p3": "创建钱包",
+			"p4": "现在，您可以在NeoFS测试网中找到NEO地址和公共密钥：",
+			"p5": "将NEP-5 GAS令牌信息添加到钱包",
+			"p6": "使用 wallet export wif &lt;address&gt; 获取Neo地址的WIF。例如:",
+			"标题": "获取Neo地址"
 		},
-		"Deposit": {
-			"p1": "To deposit GAS to the NeoFS smart contract need to run contract 0x{{neofs_sc}} method `Deposit` with options: public key, GAS amount.",
-			"p2": "For example:",
-			"title": "Deposit NEP-5 GAS to NeoFS"
+		"存款": {
+			"p1": "为使GAS存入NeoFS智能合约，需要运行合约0x {{neofs_sc}}方法的\"存款\"选项，并选择以下选项：公钥、GAS金额。",
+			"p2": "例如:",
+			"标题": "将NEP-5 GAS存入NeoFS"
 		},
-		"Wallet": {
-			"p1": "RPC endpoint http://fs.nspcc.ru:30333 can be used for custom wallets.",
-			"p2": "All the examples below will be for neo-python.",
-			"p3": "Use pre-configured <a href=\"https://github.com/nspcc-dev/neo-python\" target=\"_blank\">neo-python</a>:",
-			"p4": "or get default <a href=\"https://github.com/CityOfZion/neo-python\" target=\"_blank\">neo-python</a>: and change config file neo/data/protocol.privnet.json <a href=\"https://github.com/nspcc-dev/neo-python/blob/master/neo/data/protocol.privnet.json\" target=\"_blank\">to this</a>:",
-			"title": "Wallet"
+		"钱包": {
+			"p1":"RPC端点http://fs.nspcc.ru:30333可用于自定义钱包。",
+			"p2": "以下所有示例均适用于neo-python。",
+			"p3": "使用预配置<a href=\"https://github.com/nspcc-dev/neo-python\" target=\"_blank\">neo-python</a>:",
+			"p4": "或获取默认<a href=\"https://github.com/CityOfZion/neo-python\" target=\"_blank\"> neo-python </a>：并更改配置文件neo/data/protocol.privnet.json <a href=\"https://github.com/nspcc-dev/neo-python/blob/master/neo/data/protocol.privnet.json\" target=\"_blank\">至此</a>：",
+			"标题": "钱包"
 		},
-		"title": "How to deposit NEP-5 GAS to NeoFS (Python Neo-cli)"
+		"钱包": "如何将NEP-5 GAS存入NeoFS（Python Neo-cli）"
 	},
-	"Navigation": {
-		"Top": {
-			"audit": "Audit",
-			"data": "Data",
-			"developers": "Developers",
-			"features": "Features",
-			"incentive": "Incentives",
-			"network": "Network",
-			"videos": "Videos"
+	"漫游": {
+		"顶端": {
+			"审计": "审计",
+			"数据": "数据",
+			"开发人员": "开发人员",
+			"特征": "特征",
+			"激励": "激励",
+			"网络": "网络",
+			"视频": "视频"
 		}
 	},
-	"Network": {
-		"Environment": {
-			"p1": "As files are organized in directories in file system, objects are organized in containers in NeoFS.",
-			"p2": "Each container is served by a subset of storage nodes that satisfy storage policy defined for this particular container by the user. To calculate that nodes’ subset, storage policy filters are applied to Network Map. The resulting set of nodes is responsible for making sure that storage policy is satisfied and data is not corrupted. In case of success, they share users' payment for data storage. One storage node may serve many containers, so if it behaves correctly small shares from each container summ-up in a significant reward. The same is true for the losses in case of container nodes' misbehavior. This motivates nodes to keep an eye on other container members and properly perform all required replication, migration and data recovery processes.",
-			"p3": "Another non-obvious benefit of this approach is the bigger NeoFS network grows, the more stable it becomes, because the chance of network is changed would affect a particular container is decreasing with the increasing number of nodes in the network. It means, unlike in DHT approach, the amount of needed data migration decreases with network growth.",
-			"title": "Work reliably in chaotic environment"
+	"网络": {
+		"环境": {
+			"p1": "由于文件在文件系统的目录中组织，因此对象在NeoFS的包容器中组织。",
+			"p2": "每个包容器由满足用户为该特定容器定义的存储策略的存储节点子集提供服务。为了计算节点的子集，可将存储策略过滤器应用于网络地图。最终产生的节点集将负责确保满足存储策略，并确保数据没有损坏。如若成功，他们可共享用户为数据存储支付的费用。一个存储节点可为多个包容器提供服务，因此如果操作正确，就可以从每个包容器中获取少量的共享信息，从而获得可观的回报。而容器节点行为不当造成的损失亦如此。该操作促使节点密切关注其他包容器成员，并正确执行所有所需的复制、迁移和数据恢复过程。",
+			"p3": "该方法的另一个显而易见的好处是，NeoFS网络规模越大，网络就会越稳定，因为随着网络中节点数量的增加，网络的改变会影响到特定包容器的机会在减少。这意味着，需要迁移的数据量随网络的增长而减少，它与DHT方法不同。",
+			"标题": "旨在混乱环境中可靠的工作"
 		},
-		"Network": {
-			"p1": "NeoFS network nodes run the same software and talk the same protocol but may have different roles. There are nodes that store data and process user API requests, they are regular storage nodes that form the Outer Ring. There are nodes that take care of network health, perform service tasks, such as data audit and payments settlements, and form the Inner Ring. There are not many of them and they use dBFT 2.0 consensus algorithm to coordinate their actions.",
-			"p2": "Inner Ring nodes are connected to Neo Blockchain. They are constantly monitoring events coming from the blockchain to synchronize their state and the state of NeoFS smart contract that manages users' money deposits and information about Inner Ring nodes themselves.",
-			"p3": "Since the Inner Ring is a critical infrastructure part, not every node may get this role. The node willing to join the Inner Ring should be registered in NeoFS smart contract in Neo Blockchain and pay some security deposit that is lost in case of the node starts to behave badly.",
-			"p4": "In addition, in the same way as Neo consensus nodes, NeoFS Inner Ring nodes try to achieve maximal possible geographical, political and network decentralization.",
-			"p5": "The main use case for NeoFS is DApps's data storage and content distribution. Nowadays most DApps do not store their assets in a decentralized fashion that makes them not really distributed applications. In NeoFS, DApps can upload content and distribute it to clients via protocol gates using standard HTTPS protocol or, for example, using NeoFS API from mobile application.",
-			"p6": "DApps can access NeoFS directly from smart contract code. For instance, DApp's smart contract can generate some data and put it into NeoFS rather then storing it in the blockchain. Storing data off-chain is significantly cheaper and easier to deliver to client.",
-			"title": "Network"
+		"网络": {
+			"p1":"尽管NeoFS网络节点运行相同的软件并使用相同的协议，但它们可能扮演不同的角色。其中，有部分节点可以存储数据并处理用户API请求，它们属于常规存储节点，并形成外环。此外，还有有些节点负责网络健康运行、执行数据审计和支付结算等服务任务，并形成内环。该类节点不是很多，它们使用dBFT 2.0一致性算法来协调其操作。",
+			"p2": "内环节点连接到Neo区块链。它们不断监控来自区块链的事件，以同步其状态以及管理用户存款和内环节点自身信息的NeoFS智能契约的状态。",
+			"p3": "由于内环是基础架构的关键部分，因此并非每个节点都可以担当此角色。自愿加入内环的节点需要在Neo区块链的NeoFS智能合约中注册，并支付一定的安全保证金，倘若节点开始表现不佳，保证金将不予退还。",
+			"p4":"此外，与Neo共识节点一样，NeoFS内环节点试图实现最大可能的地理、政治和网络分散化。",
+			"p5": "NeoFS关于\"此外，与Neo共识节点一样，NeoFS内环节点试图实现最大可能的地理、政治和网络分散化\",的主要用例是DApps的数据存储和内容分发。如今，大多数DApps并未以分发的方式存储起资产，因此，它们不是真正的分布式应用程序。在NeoFS中，DApps可以通过使用标准HTTPS协议的协议门户或使用诸如移动应用程序的NeoFS API上传内容并分发给客户端。",
+			"p6": "DApp可以直接从智能合约代码访问NeoFS。 例如，DApp的智能合约可以生成一些数据并将其存入NeoFS中，而非存储于区块链中。此外链外存储数据非常便宜，也更容易交付予客户端。",
+			"标题": "网络"
 		},
-		"NetworkMap": {
-			"p1": "Inner Ring nodes monitor the state of NeoFS storage nodes. Using this information, they maintain up-to-date Network Map. It is a multi-dimensional graph where nodes have attributes and are grouped by those attributes and their values. This allows using a special data placement function to find nodes that would store an object when putting or getting it in/from NeoFS network.",
-			"p2": "This approach allows not having any centralized meta-data storage keeping object's locations and not re-balancing data with every joining or leaving storage node, as it happens in DHT-based systems.",
-			"title": "Network Map"
+		"网络地图": {
+			"p1": "内环节点监控NeoFS存储节点的状态。利用该等信息，它们可以维护最新的网络地图。网络地图是一种多维图，其中节点具有属性，可根据该等属性及其数值进行分组。当无任何网络请求的情况下将对象置于NeoFS网络或从NeoFS网络获取对象时，可使用特殊的数据布局功能以查找将存储对象的节点。",
+			"p2":"此方法不允许使用任何集中式元数据存储来保存对象的位置，也不允许在每个连接点或离开存储节点时重新平衡数据，如同在以DHT为基础的系统中一样。",
+			"标题": "网络地图"
 		},
-		"ProtocolGates": {
-			"p1": "To interact with existing systems using standard protocols, NeoFS has protocol gates. Gates are mainly maintained by users and not a part of NeoFS network. From the start, HTTP protocol gate is provided, that allows accessing data from NeoFS using regular browser. Further, AWS S3 and OpenStack Object Storage gates will be provided to allow users to make more sophisticated integrations. Technically one may easily develop own gate by using NeoFS protocol libraries.",
-			"title": "Protocol Gates"
+		"协议门户": {
+			"p1": "为使用标准协议与现有系统交互，NeoFS具有协议门户。该门户主要由用户维护，并非NeoFS网络的一部分。首先，提供HTTP协议门户，从而允许使用常规浏览器从NeoFS访问数据。然后，还将提供AWS S3和OpenStack对象存储门户，以允许用户进行更复杂的集成。就技术角度而言，可使用NeoFS协议库轻松开发属于自己的门户。",
+			"标题": "协议门户"
 		}
 	},
-	"Presentation": {
-		"Video": {
-			"title": "Video Presentation"
+	"演示": {
+		视频": {
+			"标题": "视频演示"
 		}
 	},
-	"Services": {
+	"服务": {
 		"SDK": {
-			"howto-link": "How to start with NeoFS local SDK",
-			"p1": "NeoFS local SDK, which allows deploying locally a full NeoFS network and working with it from neofs-cli, is granted for public access. <a href=\"https://github.com/nspcc-dev/neofs-local\" target=\"_blank\">Github repository</a> contains not only SDK but also <a href=\"https://github.com/nspcc-dev/demo\" target=\"_blank\">demo video </a>on how to deploy NeoFS local, Golang libraries of applied methods such as homomorphic hashing and network map and some other useful stuff.",
-			"title": "NeoFS local SDK"
+			"如何连接": "如何开始使用NeoFS本地SDK",
+			"p1": " NeoFS本地SDK允许在本地部署完整的NeoFS网络并通过neofs-cli使用，同时，它已获得公共访问权限。<a href=\"https://github.com/nspcc-dev/neofs-local\" target=\"_blank\">Github repository</a>不仅包含SDK，还包含<a href=\"https://github.com/nspcc-dev/demo\" target=\"_blank\">演示视频</a>关于如何在本地部署NeoFS以及Golang库的应用方法(如同态哈希、网络地图和其他有用的内容)。",
+			"标题": "NeoFS本地SDK"
 		},
 		"SendFS": {
-			"p1": "Objects stored on the NeoFS TestNet are distributed across multiple geographically decentralized nodes. Storage nodes are currently located in St Petersburg, New York, Singapore, Amsterdam, London, Bangalore, Toronto, and Frankfurt. At the time of press, files may be uploaded on Send.NeoFS with a user-specified lifetime of 15 minutes, 1 hour, 24 hours, or 48 hours. File uploads are free during the testing phases, with a file size limit of 50Mb.",
-			"title": "HTTP-Gate demo: <a href=\"{{neofs_send_url}}\" target=\"_blank\">Send.NeoFS</a> web service allowing users to easily upload files to the NeoFS TestNet"
+			"p1":"存储于NeoFS测试网上的对象分布在多个地理分散的节点上。其存储节点当前位于圣彼得堡、纽约、新加坡、阿姆斯特丹、伦敦、班加罗尔、多伦多和法兰克福。当按下发送键时，文件可以在用户指定的寿命为15分钟、1小时、24小时或48小时内上传至Send.NeoFS。测试阶段，文件上传是免费的，文件大小限制为50Mb。",
+			"标题": " HTTP门户演示：<a href=\"{{neofs_send_url}}\" target=\"_blank\"> Send.NeoFS </a>网络服务，使用户可以轻松地将文件上传到NeoFS测试网",
 		},
-		"Services": {
+		"服务": {
 			"NeoGO": {
-				"desc": "NeoGO nodes status in the Neo Mainnet.",
-				"title": "NeoGO nodes status"
+				"desc": " Neo主网中的NeoGO节点状态。",
+				"标题": "NeoGO节点状态"
 			},
 			"SDK": {
-				"desc": "It allows developers to deploy their own local NeoFS networks, where they may begin testing the solution and integrating support for it into their own applications.",
-				"title": "NeoFS SDK"
+				"desc": "它允许开发人员部署自己的本地NeoFS网络，在该网络中，他们可以开始测试解决方案，并将对它的支持集成到自己的应用程序中。",
+				"标题": "NeoFS SDK"
 			},
 			"SendFS": {
-				"desc": "This is a simple example of integration with NeoFS network via HTTP protocol. It allows storing files in decentralized network for the selected period of time and share them via generated link.",
-				"title": "Send.NeoFS"
+				"desc": "这是通过HTTP协议与NeoFS网络集成的简单示例。 它允许将文件存储在分散网络中选定的时间段内，并通过生成的链接进行共享。",
+				"标题": "S实时数据end.NeoFS"
 			},
-			"Status": {
-				"desc": "Grafana dashboard with real-time data on Send.NeoFS status.",
-				"title": "Send.NeoFS Status"
+			"状态": {
+				"desc": "显示数据的仪表板具有有关Send.NeoFS状态的实时数据。",
+				"标题": "Send.NeoFS状态"
 			},
-			"TestNet": {
-				"desc": "NeoFS Public TestNet release allows developers in the NEO ecosystem to experiment with NeoFS and test potential applications that can make use of decentralized storage facilities.",
-				"title": "NeoFS Public TestNet"
+			"测试网": {
+				"desc": "NeoFS公共测试网版本允许NEO生态系统中的开发人员使用NeoFS进行试验，并测试可以使用分散存储设施的潜在应用程序。",
+				"标题": "NeoFS公共测试网"
 			},
-			"Wallet": {
-				"desc": "Wallet for NeoFS Public TestNet with NeoFS smart contract deposit operation.",
-				"title": "Simple Wallet for NeoFS Public TestNet"
+			"钱包": {
+				"desc": "具有NeoFS智能合约存款操作的NeoFS公共测试网钱包。",
+				"标题": "NeoFS公共测试网的简单钱包"
 			},
-			"title": "Services"
+			"标题": "服务"
 		},
-		"TestNet": {
-			"epoch": "NeoFS epoch:",
-			"howto_link": "How to deposit NEP-5 GAS to NeoFS ",
-			"loading": "Loading...",
-			"p1": "Any node can be used as NeoFS endpoint in the NeoFS CLI.",
-			"p2": "We recommend choosing either your own node or the closest one possible.",
-			"refresh": "Refresh",
-			"title": "NeoFS Public TestNet State",
-			"tokens_link": "Get NEP-5 GAS tokens for public NeoFS TestNet"
+		"测试网": {
+			"时期": "NeoFS时期:",
+			"如何链接": "如何将NEP-5 GAS存入NeoFS",
+			"加载": "加载中...",
+			"p1": "任何节点均可在NeoFS CLI中用作NeoFS端点。",
+			"p2": "我们建议您选择自己的节点或最接近的节点。",
+			"刷新": "刷新",
+			"标题": "NeoFS公共测试网状态",
+			"令牌_链接": "为公共NeoFS测试网获取NEP-5 GAS令牌"
 		}
 	},
-	"Tokens": {
-		"Get": {
-			"address": "Ender your Neo Address for NeoFS Testnet:",
-			"checkbalance": "Check balance",
-			"loading": "Loading...",
-			"p1": "Get 5 GAS and 50 Nep-5 GAS Tokens (for Neo2 Testnet). With the transition to the Neo 3.0 TestNet only GAS token will be send. ",
-			"p2": "How to connect to NeoFS Neo TestNet and create Neo address <a href=\"/howto\" target=\"_blank\" >can be found here.</a>",
-			"processing": "Processing of the transactions: please, be patient until they will be added to block.",
-			"send": "Send",
-			"title": "Get GAS for public NeoFS Testnet"
+	"令牌": {
+		"获取": {
+			"地址": "为NeoFS 测试网赋予Neo地址：",
+			"查询余额": "查询余额",
+			"加载": "加载中...",
+			"p1": "获得5个GAS和50个Nep-5 GAS令牌（用于Neo2 测试网t）。随着向Neo 3.0测试网的过渡，将仅发送GAS令牌。",
+			"p2": "如何连接到NeoFS Neo测试网并创建Neo地址<a href=\"/howto\" target=\"_blank\" >可以在此处找到。</a>",
+			"数据处理":"交易处理：请耐心等待，直到将其添加到代码块中为止。",
+			"发送": "发送",
+			"标题": "为公共NeoFS测试网获取GAS"
 		}
 	},
-	"Wallet": {
-		"Main": {
-			"address": "Address:",
-			"close": "Close",
-			"deposit": "Deposit",
-			"generate": "Generate New Wallet",
-			"info": "Wallet info",
-			"loading": "Loading...",
-			"nep5deposit": "Enter your NEP-5 GAS tokens amount for deposit to NeoFS balance:",
-			"privkey": "Private key:",
-			"pubkey": "Public key:",
-			"refresh": "Refresh",
-			"requestgas": "Request tokens to wallet",
-			"requestneofs": "Request tokens to NeoFS account",
-			"title": "Simple NeoFS Testnet Wallet",
-			"txprocessing": "Processing of the transactions: please, be patient until they will be added to block.",
-			"wallet": "Wallet",
+	"钱包": {
+		"主程序": {
+			"地址": "地址:",
+			"关闭": "关闭",
+			"存款": "存款",
+			"生成": "生成新钱包",
+			"信息": "钱包信息",
+			"加载": "加载中...",
+			"nep5deposit": "输入您的NEP-5 GAS令牌以存入NeoFS余额：",
+			"私钥字节": "私钥:",
+			"公钥字节": "公钥:",
+			"刷新": "刷新",
+			"requestgas": "向钱包申请令牌",
+			"requestneofs": "向NeoFS账户申请令牌",
+			"标题": "简单的NeoFS测试网钱包",
+			"txprocessing": "交易处理：请耐心等待，直到将其添加到代码块中为止。",
+			"钱包": "钱包",
 			"wif": "WIF: ",
-			"wifenter": "Enter your NeoFS Testnet Neo Address WIF or private key:"
+			"wifenter": "输入您的NeoFS测试网Neo地址WIF或私钥："
 		}
 	}
 }

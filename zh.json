@@ -253,7 +253,7 @@
 		},
 		"SendFS": {
 			"p1":"存储于NeoFS测试网上的对象分布在多个地理分散的节点上。其存储节点当前位于圣彼得堡、纽约、新加坡、阿姆斯特丹、伦敦、班加罗尔、多伦多和法兰克福。当按下发送键时，文件可以在用户指定的寿命为15分钟、1小时、24小时或48小时内上传至Send.NeoFS。测试阶段，文件上传是免费的，文件大小限制为50Mb。",
-			"title": " HTTP门户演示：<a href=\"{{neofs_send_url}}\" target=\"_blank\"> Send.NeoFS </a>网络服务，使用户可以轻松地将文件上传到NeoFS测试网",
+			"title": " HTTP门户演示：<a href=\"{{neofs_send_url}}\" target=\"_blank\"> Send.NeoFS </a>网络服务，使用户可以轻松地将文件上传到NeoFS测试网"
 		},
 		"Services": {
 			"NeoGO": {

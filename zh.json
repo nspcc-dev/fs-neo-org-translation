@@ -282,7 +282,7 @@
 			},
 			"SendFS": {
 				"desc": "这是通过HTTP协议与NeoFS网络集成的简单示例。 它允许将文件存储在分散网络中选定的时间段内，并通过生成的链接进行共享。",
-				"title": "S实时数据end.NeoFS"
+				"title": "Send.NeoFS"
 			},
 			"Status": {
 				"desc": "显示数据的仪表板具有有关Send.NeoFS状态的实时数据。",

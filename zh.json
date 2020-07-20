@@ -273,8 +273,8 @@
 				"title": "NeoGO节点状态"
 			},
 			"RequestGas": {
-				"desc": "为公共NeoFS Testnet获取GAS",
-				"title": "要求GAS到Neo地址"
+				"desc": "获取NeoFS测试网的GAS",
+                "title": "申请GAS到Neo地址"
 			},
 			"SDK": {
 				"desc": "它允许开发人员部署自己的本地NeoFS网络，在该网络中，他们可以开始测试解决方案，并将对它的支持集成到自己的应用程序中。",
